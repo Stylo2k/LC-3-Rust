@@ -5,6 +5,7 @@ use super::register::Registers;
 
 use std::io::Read;
 
+#[derive(Hash)]
 pub struct VM {
     pub memory: [u16; MEMORY_SIZE],
     pub registers: Registers,

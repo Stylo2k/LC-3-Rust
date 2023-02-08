@@ -4,6 +4,7 @@ const PC_START: u16 = 0x3000;
 // 1 program counter, and one condition flag.
 // The program counter stores an uint that is the memory
 // address of the next instruction to be executed.
+#[derive(Hash, Debug)]
 pub struct Registers {
     pub r0: u16,
     pub r1: u16,
