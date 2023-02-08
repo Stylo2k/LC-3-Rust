@@ -21,7 +21,8 @@ impl VM {
     fn safe_fail(&self, error_msg: &str, error_code: i32) {
         eprintln!("{}", error_msg);
         eprintln!("PC: {:#06x}", self.registers.pc);
-        eprintln!("Instruction: {:#06x}", self.memory[self.registers.pc as usize]);
+        eprintln!("Instruction: {:#06x}", self.memory[self.registers.pc - 1 as usize]);
+        eprintln!("The instruction printed is at PC-1, because PC has already been incremented. There is no guarantee that the instruction at PC-1 is the one that caused the error. You might have had a jump");
         std::process::exit(error_code);
     }
 
