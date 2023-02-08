@@ -29,6 +29,7 @@ pub fn execute_program(vm: &mut VM) {
             eprintln!("Loop detected at PC: {}", vm.registers.pc);
             eprintln!("Instruction: {}", instruction);
             eprintln!("Registers: {:?}", vm.registers);
+            eprintln!("=== Note: This is an experimental feature. It might not work as expected. ===");
         } else {
             seen.insert(hash);
         }
