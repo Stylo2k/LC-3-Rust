@@ -1,0 +1,306 @@
+.orig x3000
+;part below gets input and stores it in
+    ld r1 a~ ;holds the halting value
+    ld r2 text_p ;hold pointer
+    ld r3 text ;holds memory loction
+    and r6 r6 #0
+    and r7 r7 #0
+input
+    getc
+    out
+    add r4 r0 r1 ; check if it was teh halting value
+    brz inter_1.1
+    str r0 r3 #0
+    add r2 r2 #1
+    add r3 r3 #1
+    brnzp input
+
+inter_1.1
+;r1 holds the tape location
+;r2 holds the text location
+;r3 is used to see whats the text at the time
+    ld r1 tape
+    ld r2 text
+inter_1
+
+    ldr r3 r2 #0
+    brz end_ ;check if the last value of the text has been reached
+
+    ;check if +
+test_1
+    ld r4 a+
+    add r4 r4 r3
+    brnp test_2
+    ldr r4 r1 #0
+    add r4 r4 #1
+    str r4 r1 #0
+    add r2 r2 #1
+    br inter_1
+
+    ;check if ,
+test_2
+    add r4 r4 #-1
+    brnp test_3
+    getc
+    out
+    str r0 r1 #0
+    add r2 r2 #1
+    br inter_1
+
+    ;check if -
+test_3
+    add r4 r4 #-1
+    brnp test_4
+    ldr r4 r1 #0
+    add r4 r4 #-1
+    str r4 r1 #0
+    add r2 r2 #1
+    br inter_1
+
+    ;check if .
+test_4
+    add r4 r4 #-1
+    brnp test_5
+    ldr r0 r1 #0
+    out
+    and r0 r0 #0
+    add r0 r0 #10
+    out
+    add r2 r2 #1
+    br inter_1
+
+test_4.1
+    add r4 r4 #-1
+    brnp test_5
+    ld r6 print
+    jsrr r6
+    add r2 r2 #1
+    br inter_1
+
+    ;check if <
+test_5
+    add r4 r4 #-14
+    brnp test_6
+    add r1 r1 #-1
+    add r2 r2 #1
+    br inter_1
+
+    ;check if >
+test_6
+    add r4 r4 #-2
+    brnp test_7
+    add r1 r1 #1
+    add r2 r2 #1
+    br inter_1
+
+    ;check if [
+test_7
+    add r4 r4 #-16
+    add r4 r4 #-13
+    brnp test_8
+    ldr r4 r1 #0
+    brz zero_1 ;in case the value in the tape is 0
+    ;if the value isnt 0
+        ;check if the value in r4 has already been registered
+        ldi r4 loc[
+        not r5 r4
+        add r5 r5 #1
+        add r5 r5 r2
+        brz completed
+        ;if it hasnt we must register it
+        ld r4 loc[
+        str r2 r4 #1
+        add r4 r4 #1
+        st r4 loc[
+        completed
+            add r2 r2 #1
+            br inter_1
+    zero_1 ;complete code
+        ld r4 loc[
+        add r4 r4 #-1
+        st r4 loc[
+        ld r4 loc]
+        ld r5 loc
+        add r5 r5 r4
+        brz non
+        ldr r2 r4 #0
+        add r4 r4 #-1
+        st r4 loc]
+
+        ld r2 loc]
+        add r4 r2 #-1
+        st r4 loc]
+        br inter_1
+        non
+            add r2 r2 #1
+            ld r5 a]
+            ldr r4 r2 #0
+            add r4 r4 r5
+            brz next
+            br non
+        next
+            add r2 r2 #1
+            br inter_1
+
+test_8
+    add r4 r4 #-2
+    brnp none
+    ldr r4 r1 #0
+    brz zero_2
+   ;store the ending
+        ldi r4 loc]
+        not r5 r4
+        add r5 r5 #1
+        add r5 r5 r2
+        brz done
+        ld r4 loc]
+        str r2 r4 #1
+    done
+    ;load the next start
+        ldi r4 loc[
+        add r2 r4 #0
+        br inter_1
+    zero_2
+        ld r4 loc[
+        add r4 r4 #-1
+        st r4 loc[
+none
+    add r2 r2 #1
+    br inter_1
+
+
+end_
+halt
+tape .fill x4000
+text .fill x4500
+loc[ .fill x5710
+loc] .fill x58A0
+loc .fill x-58A0
+text_p .fill #0
+a+ .fill #-43
+a~ .fill #-126
+a] .fill #-93
+print .fill x6200
+.end
+
+
+
+
+;function to print whats in r1
+.orig x6200
+and r0 r0 #0
+ldr r4 r1 #0
+;ld r4 test
+step_1
+    ld r5 hex_1
+    add r6 r5 r4
+    brn step_2
+        and r6 r6 #0
+        step_1.1
+            add r4 r4 r5
+            brn step_1.2
+            add r6 r6 #1
+            br step_1.1
+        step_1.2
+            not r5 r5
+            add r5 r5 #1
+            add r4 r4 r5
+            add r5 r6 #-10
+            brzp dec_1
+                ld r5 dec_48
+                add r0 r5 r6
+                out
+                br step_2
+            dec_1
+                ld r5 dec_A
+                add r0 r5 r6
+                out
+                br step_2
+step_2
+    ld r5 hex_2
+    add r6 r5 r4
+    brn step_2.3
+
+    and r6 r6 #0
+        step_2.1
+            add r4 r4 r5
+            brn step_2.2
+            add r6 r6 #1
+            br step_2.1
+        step_2.2
+            not r5 r5
+            add r5 r5 #1
+            add r4 r4 r5
+            add r5 r6 #-10
+            brzp dec_2
+                ld r5 dec_48
+                add r0 r5 r6
+                out
+                br step_3
+            dec_2
+                ld r5 dec_A
+                add r0 r5 r6
+                out
+                br step_3
+        step_2.3
+            add r0 r0 #0
+            brz step_3
+            ld r0 dec_48
+            out
+step_3
+    ld r5 hex_3
+    add r6 r5 r4
+    brn step_3.3
+
+    and r6 r6 #0
+        step_3.1
+            add r4 r4 r5
+            brn step_3.2
+            add r6 r6 #1
+            br step_3.1
+        step_3.2
+            not r5 r5
+            add r5 r5 #1
+            add r4 r4 r5
+            add r5 r6 #-10
+            brzp dec_3
+                ld r5 dec_48
+                add r0 r5 r6
+                out
+                br step_4
+            dec_3
+                ld r5 dec_A
+                add r0 r5 r6
+                out
+                br step_4
+        step_3.3
+            add r0 r0 #0
+            brz step_4
+            ld r0 dec_48
+            out
+step_4
+    add r5 r4 #-9
+    brzp dec_4
+    ld r5 dec_48
+    add r0 r5 r4
+    out
+    br new_line
+    dec_4
+        ld r5 dec_A
+        add r0 r5 r4
+        out
+
+new_line
+and r0 r0 #0
+add r0 r0 #10
+out
+
+end__
+ret
+dec_48 .fill #48
+dec_A .fill #55
+hex_1 .fill x-1000
+hex_2 .fill x-100
+hex_3 .fill x-10
+test .fill x6BC0
+.end
